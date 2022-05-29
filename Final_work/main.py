@@ -66,6 +66,7 @@ def shot_detection(lmList, queue):
     else:
         return False, queue
 
+
 def Thumb_state(lmList):
     thumb_state = 0
     if lmList[4][1] < lmList[1][1]:
@@ -73,6 +74,7 @@ def Thumb_state(lmList):
     elif lmList[4][1] > lmList[1][1]:
         thumb_state = 2
     return thumb_state
+
 
 def switch_state(lmList):
     x_5, y_5 = lmList[5][1], lmList[5][2]
@@ -82,12 +84,13 @@ def switch_state(lmList):
     try:
         result0 = (y_6 - y_5) / (x_6 - x_5)
         result1 = (y_10 - y_9) / (x_10 - x_9)
-    except(ZeroDivisionError):
+    except (ZeroDivisionError):
         return False
     if result0 < -1.0 and result1 < -1.0:
         return True
     else:
         return False
+
 
 def zoom_state(lmList):
     x_5, y_5 = lmList[5][1], lmList[5][2]
@@ -100,12 +103,13 @@ def zoom_state(lmList):
         result1 = (y_10 - y_9) / (x_10 - x_9)
         print("result0=", result0)
         print("result1=", result1)
-    except(ZeroDivisionError):
+    except (ZeroDivisionError):
         return False
     if (result0 < -1.0) and (result1 < -1.0) and (not (y_16 < y_13)):
         return True
     else:
         return False
+
 
 def updown_state(lmList):
     x_5, y_5 = lmList[5][1], lmList[5][2]
@@ -113,13 +117,12 @@ def updown_state(lmList):
     y_13, y_16 = lmList[13][2], lmList[16][2]
     try:
         result0 = (y_6 - y_5) / (x_6 - x_5)
-    except(ZeroDivisionError):
+    except (ZeroDivisionError):
         return False
     if (result0 < -1.0) and (not (y_16 < y_13)):
         return True
     else:
         return False
-
 
 
 def main():
@@ -131,8 +134,8 @@ def main():
     cap.set(3, wCam)
     cap.set(4, hCam)
 
-    ctr = pynput.mouse.Controller() # 模拟鼠标
-    keyboard = Controller()         # 模拟键盘
+    ctr = pynput.mouse.Controller()  # 模拟鼠标
+    keyboard = Controller()  # 模拟键盘
     ################################################
     pTime = 0
     thumb_state = 0
@@ -153,22 +156,21 @@ def main():
         img = detectorFlip.findHands(img)
         lmList = detectorFlip.findPosition(img, draw=False)
         if len(lmList) >= 21:
-            if_hand = 1                                         # 表示画面中有手
+            if_hand = 1  # 表示画面中有手
         else:
-            if_hand = 0    
+            if_hand = 0
         cTime = time.time()
 
-        fps = 1/(cTime-pTime)
+        fps = 1 / (cTime - pTime)
         pTime = cTime
         if if_hand:
-            
+
             # 判断中间三指是否长时间处于伸展状态
             if stretch_state == 0 and shot_state == 0:
                 # function_lock = False
                 stretch_result, stretch_queue = stretch_detection(
                     lmList, stretch_queue)
-                shot_result, shot_queue = shot_detection(
-                    lmList, shot_queue)
+                shot_result, shot_queue = shot_detection(lmList, shot_queue)
                 if stretch_result:
                     stretch_state = 1
                     targetTime = time.time()
@@ -176,7 +178,6 @@ def main():
                     shot_state = 1
                     targetTime = time.time()
                 print(stretch_state, shot_state)
-
 
             elif shot_state == 1:
                 shot_state = 0
@@ -193,19 +194,17 @@ def main():
                 elif (time.time() - targetTime) > 1.5:
                     stretch_state = 0
 
-
-
             thumb_state = Thumb_state(lmList)
             if lmList[16][2] > lmList[13][2]:
-            #if y_16 > y_13:
+                #if y_16 > y_13:
                 tab_ready_0 = 0
                 tab_ready_1 = 0
             else:
                 tab_ready_0 = 1
 
-
             if thumb_state == 1:
-                if switch_state(lmList) and (tab_ready_0 and (not tab_ready_1)):
+                if switch_state(lmList) and (tab_ready_0 and
+                                             (not tab_ready_1)):
                     ctrl.switch_right_page()
                     tab_ready_1 = tab_ready_0
                 elif zoom_state(lmList):
@@ -214,10 +213,10 @@ def main():
                     ctrl.page_down()
                 else:
                     pass
-        
-        
+
             elif thumb_state == 2:
-                if switch_state(lmList) and (tab_ready_0 and (not tab_ready_1)):
+                if switch_state(lmList) and (tab_ready_0 and
+                                             (not tab_ready_1)):
                     ctrl.switch_left_page()
                     tab_ready_1 = tab_ready_0
                 elif zoom_state(lmList):
@@ -229,11 +228,11 @@ def main():
             else:
                 pass
 
-        
-        cv2.putText(img, f'FPS:{int(fps)}', (40,50), cv2.FONT_HERSHEY_COMPLEX,
+        cv2.putText(img, f'FPS:{int(fps)}', (40, 50), cv2.FONT_HERSHEY_COMPLEX,
                     1, (255, 0, 0), 3)
         cv2.imshow("Image", img)
         cv2.waitKey(1)
+
 
 if __name__ == "__main__":
     main()

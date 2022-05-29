@@ -8,8 +8,16 @@
 import cv2
 import mediapipe as mp
 import time
+
+
 class handDetector:
-    def __init__(self, mode=False, maxHands=2, model_complexity=1, detectionCon=0.5, trackCon=0.5):
+
+    def __init__(self,
+                 mode=False,
+                 maxHands=2,
+                 model_complexity=1,
+                 detectionCon=0.5,
+                 trackCon=0.5):
         self.mode = mode
         self.maxHands = maxHands
         self.model_complexity = model_complexity
@@ -17,7 +25,9 @@ class handDetector:
         self.trackCon = trackCon
 
         self.mpHands = mp.solutions.hands
-        self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.model_complexity, self.detectionCon, self.trackCon)
+        self.hands = self.mpHands.Hands(self.mode, self.maxHands,
+                                        self.model_complexity,
+                                        self.detectionCon, self.trackCon)
         self.mpDraw = mp.solutions.drawing_utils
 
     def findHands(self, img, draw=True):
@@ -27,9 +37,11 @@ class handDetector:
         if self.results.multi_hand_landmarks:
             for handLms in self.results.multi_hand_landmarks:
                 if draw:
-                    self.mpDraw.draw_landmarks(img, handLms,
-                                               self.mpHands.HAND_CONNECTIONS)  # 画出总共21个关节点并且关节点之间连线
+                    self.mpDraw.draw_landmarks(
+                        img, handLms,
+                        self.mpHands.HAND_CONNECTIONS)  # 画出总共21个关节点并且关节点之间连线
         return img
+
     def findPosition(self, img, handNo=0, draw=True):
         lmList = []
 
@@ -38,12 +50,14 @@ class handDetector:
             for id, lm in enumerate(myHand.landmark):
                 # print(id, lm)
                 h, w, c = img.shape
-                cx, cy = int(lm.x *w), int(lm.y * h)
+                cx, cy = int(lm.x * w), int(lm.y * h)
                 # print(id, cx, cy)
                 lmList.append([id, cx, cy])
                 if draw:
                     cv2.circle(img, (cx, cy), 7, (255, 0, 0), cv2.FILLED)
         return lmList
+
+
 def main():
     pTime = 0
     cTime = 0
@@ -60,8 +74,11 @@ def main():
         fps = 1 / (cTime - pTime)
         pTime = cTime
         # 播放帧率
-        cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
+        cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3,
+                    (255, 0, 255), 3)
         cv2.imshow("Image", img)
         cv2.waitKey(1)
+
+
 if __name__ == "__main__":
     main()
